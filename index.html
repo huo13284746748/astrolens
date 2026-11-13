@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="AstroLens — 结合大模型与手部识别的沉浸式天文科普展项" />
+  <title>AstroLens · AI 天文科普互动展项</title>
+</head>
+<body>
+  <!-- 3D 舞台 -->
+  <div id="stage" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- 品牌与形态指示 -->
+  <header class="brand">
+    <div class="brand__mark">ASTROLENS</div>
+    <div class="brand__sub">AI 天文科普互动展项</div>
+    <div class="shape-tag" id="shape-tag">
+      <span class="shape-tag__dot"></span>
+      <span id="shape-label">恒星</span>
+    </div>
+  </header>
+
+  <!-- 左侧手势遥测 -->
+  <aside class="hud" id="hud">
+    <div class="hud__row">
+      <span class="hud__key">手势</span>
+      <span class="hud__val" id="hud-gesture">等待中</span>
+    </div>
+    <div class="hud__row">
+      <span class="hud__key">手部</span>
+      <span class="hud__val" id="hud-hands">0 / 2</span>
+    </div>
+    <div class="hud__row">
+      <span class="hud__key">镜头</span>
+      <span class="hud__val" id="hud-distance">360</span>
+    </div>
+    <div class="hud__row">
+      <span class="hud__key">渲染</span>
+      <span class="hud__val" id="hud-fps">— fps</span>
+    </div>
+    <div class="hud__hint">
+      单手：倾斜旋转 · 握拳拉远 · 张开靠近 · V 手势脉冲 · OK 跃迁<br />
+      双手：距离缩放 · 同时握拳进入时空扭曲
+    </div>
+    <button class="hud__cam" id="cam-toggle" type="button">开启手势识别</button>
+  </aside>
+
+  <!-- 摄像头预览 -->
+  <div class="preview" id="preview-wrap" hidden>
+    <canvas id="preview" width="200" height="150"></canvas>
+    <span class="preview__tag">HAND TRACKING</span>
+  </div>
+
+  <!-- AI 对话面板 -->
+  <section class="chat" id="chat" aria-label="AI 天文问答">
+    <div class="chat__head">
+      <div class="chat__title">
+        <span class="chat__pulse"></span>
+        天文讲解员
+      </div>
+      <div class="chat__actions">
+        <span class="mode-chip" id="mode-chip" title="当前推理模式">本地</span>
+        <button class="icon-btn" id="btn-settings" type="button" title="设置">⚙</button>
+        <button class="icon-btn" id="btn-collapse" type="button" title="收起">—</button>
+      </div>
+    </div>
+
+    <div class="chat__body" id="chat-body">
+      <div class="msg msg--ai">
+        <div class="msg__bubble">
+          你好，我是 AstroLens 讲解员。问我任何天文问题，我会一边讲解，一边把星尘重构成对应的天体形态。
+        </div>
+      </div>
+      <div class="chips" id="chips">
+        <button class="chip" data-q="黑洞是怎么形成的？">黑洞</button>
+        <button class="chip" data-q="超新星爆发会发生什么？">超新星</button>
+        <button class="chip" data-q="星云和恒星诞生有什么关系？">星云</button>
+        <button class="chip" data-q="银河系是什么结构？">银河系</button>
+        <button class="chip" data-q="什么是引力波？">引力波</button>
+      </div>
+    </div>
+
+    <form class="chat__input" id="ask-form">
+      <button class="icon-btn icon-btn--mic" id="btn-mic" type="button" title="语音提问">🎙</button>
+      <input
+        id="ask-input"
+        type="text"
+        autocomplete="off"
+        placeholder="问一个天文问题…"
+        maxlength="200"
+      />
+      <button class="send-btn" id="btn-send" type="submit">发送</button>
+    </form>
+  </section>
+
+  <!-- 启动遮罩：音频与摄像头权限必须由用户手势触发 -->
+  <div class="boot" id="boot">
+    <div class="boot__inner">
+      <div class="boot__ring"></div>
+      <h1 class="boot__title">ASTROLENS</h1>
+      <p class="boot__desc">
+        一个用大模型驱动的天文展项<br />
+        你的问题会重塑这片星尘
+      </p>
+      <button class="boot__btn" id="boot-btn" type="button">进入星图</button>
+      <p class="boot__tip">进入后可开启摄像头，用手势操控视角</p>
+    </div>
+  </div>
+
+  <!-- 设置面板 -->
+  <dialog class="settings" id="settings">
+    <form method="dialog" class="settings__form">
+      <h2 class="settings__title">设置</h2>
+
+      <label class="field">
+        <span>接入方式</span>
+        <select id="set-proxy">
+          <option value="proxy">服务端代理（推荐，密钥不暴露）</option>
+          <option value="direct">浏览器直连（需填 Key）</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Base URL</span>
+        <input id="set-baseurl" type="text" placeholder="https://api.deepseek.com/v1" />
+      </label>
+
+      <label class="field">
+        <span>模型名称</span>
+        <input id="set-model" type="text" placeholder="deepseek-chat" />
+      </label>
+
+      <label class="field">
+        <span>API Key</span>
+        <input id="set-apikey" type="password" placeholder="留空则走服务端代理" />
+      </label>
+
+      <div class="settings__group">
+        <label class="switch">
+          <input type="checkbox" id="set-bgm" />
+          <span>星际背景音乐</span>
+        </label>
+        <label class="switch">
+          <input type="checkbox" id="set-sfx" />
+          <span>交互音效</span>
+        </label>
+      </div>
+
+      <div class="settings__footer">
+        <button class="ghost-btn" id="set-reset" type="button">重置</button>
+        <button class="send-btn" id="set-save" type="button">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 隐藏的视频源 -->
+  <video id="cam" playsinline muted></video>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
