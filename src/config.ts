@@ -54,7 +54,7 @@ export const VISUAL = {
   nebulaCount: 5000,
   baseRadius: 50,
   minCameraDistance: 120,
-  maxCameraDistance: 1400,
+  maxCameraDistance: 460,
   defaultCameraDistance: 360,
 } as const;
 

@@ -42,7 +42,7 @@ export const TOOL_SCHEMAS: ToolSchema[] = [
         properties: {
           distance: {
             type: 'number',
-            description: '镜头距离，范围 120（最近）到 1200（最远）',
+            description: '镜头距离。默认 360，可用范围 140（最近）到 380（最远）；超过 380 画面主体会小到看不清，不要使用',
           },
         },
         required: ['distance'],
@@ -118,7 +118,7 @@ export function executeTool(
       if (!Number.isFinite(d)) {
         return { name: call.name, args: parsed, result: '距离参数无效' };
       }
-      handlers.setCamera(d);
+      handlers.setCamera(Math.min(380, Math.max(140, d)));
       return { name: call.name, args: parsed, result: `镜头距离已设为 ${d}` };
     }
     case 'trigger_effect': {
