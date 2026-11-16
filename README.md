@@ -227,7 +227,7 @@ LLM_BASE_URL=https://api.deepseek.com/v1 LLM_API_KEY=sk-xxx node server/proxy.mj
 |---|---|
 | 参赛赛项 | 2026 第九届传智杯 · AI WEB 网页开发挑战赛 |
 | 团队名称 | SSR |
-| 团队成员 | 火耀（2026410045）、张语瞳、蔡艺玲 |
+| 团队成员 | 火耀、张语瞳、蔡艺玲 |
 | 指导教师 | 于洪、刘冬昊 |
 | 所在院校 | 黑龙江工商学院 |
 
