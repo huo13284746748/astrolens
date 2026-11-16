@@ -69,7 +69,7 @@ export class AstroAgent {
 
     // 3. 无模型 → 本地降级
     if (!this.llm.available) {
-      this.answerOffline(hits, handlers);
+      await this.answerOffline(hits, handlers);
       return;
     }
 
@@ -148,8 +148,8 @@ export class AstroAgent {
           : `模型调用失败：${(err as Error).message}`;
       handlers.onStatus('已降级为本地模式');
       handlers.onError(message);
-      // 出错也要保证画面有反馈
-      this.answerOffline(hits, handlers, true);
+      // 出错也要保证讲解内容照常输出到对话框，而不是留下空气泡
+      await this.answerOffline(hits, handlers);
     }
   }
 
@@ -178,8 +178,11 @@ export class AstroAgent {
     }
   }
 
-  /** 本地知识库回答 */
-  private answerOffline(hits: RetrievalHit[], handlers: AgentHandlers, silent = false): void {
+  /** 本地知识库回答：逐字输出，全部输出完成后再返回 */
+  private answerOffline(
+    hits: RetrievalHit[],
+    handlers: AgentHandlers,
+  ): Promise<void> {
     const best = hits[0];
     if (!best) {
       handlers.onDone(
@@ -187,29 +190,27 @@ export class AstroAgent {
         true,
       );
       handlers.onStatus('就绪');
-      return;
+      return Promise.resolve();
     }
 
     this.tools.setMorph(best.entry.morph);
     this.tools.triggerEffect('pulse');
 
     const text = fallbackAnswer(best.entry.title, best.entry.content);
-    if (!silent) {
-      // 模拟逐字输出，保持交互一致
-      const chars = Array.from(text);
+    const chars = Array.from(text);
+
+    return new Promise<void>((resolve) => {
       let i = 0;
       const timer = window.setInterval(() => {
-        const chunk = chars.slice(i, i + 3).join('');
+        handlers.onToken(chars.slice(i, i + 3).join(''));
         i += 3;
-        handlers.onToken(chunk);
         if (i >= chars.length) {
           clearInterval(timer);
           handlers.onStatus('就绪');
           handlers.onDone(text, true);
+          resolve();
         }
       }, 24);
-    } else {
-      handlers.onDone(text, true);
-    }
+    });
   }
 }

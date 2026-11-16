@@ -126,6 +126,8 @@ export class ChatPanel {
       },
       finish: () => {
         bubble.classList.remove('is-streaming');
+        // 一条内容都没产生（例如输入被安全策略拦截）时移除空气泡
+        if (buffer.length === 0) wrap.remove();
         this.scroll();
       },
     };

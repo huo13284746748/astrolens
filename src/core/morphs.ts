@@ -61,13 +61,35 @@ export function morphTarget(
     }
 
     case 'blackhole': {
-      // 吸积盘：扁平圆盘 + 螺旋扭曲，中心留空
-      const r = baseR * (1.3 + s1 * 1.6);
-      const ang = s2 * TAU + r * 0.02;
-      const thin = (s3 - 0.5) * baseR * 0.06;
-      out[0] = Math.cos(ang) * r;
-      out[1] = thin;
-      out[2] = Math.sin(ang) * r;
+      // 吸积盘：极薄、内缘锐利，中心彻底留空形成黑洞阴影；
+      // 15% 的粒子压实为光子环，紧贴阴影边缘形成一圈亮边。
+      // 盘面整体倾斜约 20°，避免默认视角下完全侧看的「一条线」
+      const tilt = 0.34;
+      const ct = Math.cos(tilt);
+      const st = Math.sin(tilt);
+
+      let r: number;
+      let ang: number;
+      let h: number;
+
+      if (s3 > 0.85) {
+        // 光子环
+        r = baseR * (1.02 + s1 * 0.05);
+        ang = s1 * TAU;
+        h = (s2 - 0.5) * baseR * 0.01;
+      } else {
+        // 盘面：半径向内侧聚集，越靠里越密、越亮
+        const t = Math.pow(s1, 1.7);
+        r = baseR * (1.06 + t * 1.5);
+        ang = s2 * TAU + r * 0.02;
+        h = (s3 - 0.5) * baseR * 0.03;
+      }
+
+      const px = Math.cos(ang) * r;
+      const pz = Math.sin(ang) * r;
+      out[0] = px;
+      out[1] = h * ct + pz * st;
+      out[2] = pz * ct - h * st;
       return;
     }
 

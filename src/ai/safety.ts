@@ -36,7 +36,7 @@ export function guardInput(raw: string): GuardResult {
     return {
       ok: false,
       text: text.slice(0, MAX_INPUT_LENGTH),
-      reason: `问题过长，已截断至 ${MAX_INPUT_LENGTH} 字`,
+      reason: `问题过长，请控制在 ${MAX_INPUT_LENGTH} 字以内`,
     };
   }
   for (const p of BLOCKED_PATTERNS) {

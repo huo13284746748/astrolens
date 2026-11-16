@@ -10,7 +10,7 @@ const GESTURE_LABEL: Record<GestureName, string> = {
   open: '张开 · 靠近',
   peace: 'V 手势 · 脉冲',
   ok: 'OK · 跃迁',
-  rock: '摇滚 · 变色',
+  rock: '摇滚 · 换形态',
   pinch: '捏合 · 共鸣',
   point: '指向',
 };

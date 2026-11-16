@@ -94,8 +94,11 @@ export class GestureController {
   }
 
   async start(): Promise<void> {
+    // 防重入：按钮可重复点击，重复启动会叠加多条识别循环并泄漏摄像头流
+    if (this.running) return;
+
     const vision = await FilesetResolver.forVisionTasks('/mediapipe');
-    this.landmarker = await HandLandmarker.createFromOptions(vision, {
+    const landmarker = await HandLandmarker.createFromOptions(vision, {
       baseOptions: {
         modelAssetPath: '/models/hand_landmarker.task',
         delegate: 'GPU',
@@ -106,11 +109,20 @@ export class GestureController {
       minHandPresenceConfidence: 0.5,
       minTrackingConfidence: 0.5,
     });
+    this.landmarker = landmarker;
 
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480, facingMode: 'user' },
-      audio: false,
-    });
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480, facingMode: 'user' },
+        audio: false,
+      });
+    } catch (err) {
+      // 摄像头不可用时释放已创建的模型，避免下次重试重复占用
+      landmarker.close();
+      this.landmarker = null;
+      throw err;
+    }
+
     this.video.srcObject = this.stream;
     await this.video.play();
 

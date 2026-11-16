@@ -80,6 +80,9 @@ export class AstroScene {
   private handRotation = 0;
   private zoomVelocity = 0;
   private autoRotate = true;
+  /** 装饰环透明度，黑洞形态下淡出以免遮挡吸积盘 */
+  private decorFade = 1;
+  private decorTarget = 1;
 
   private running = false;
   private frameCount = 0;
@@ -192,6 +195,8 @@ export class AstroScene {
 
   setMorph(shape: MorphShape): void {
     this.planet.setMorph(shape);
+    // 黑洞形态下淡出两条装饰环，突出吸积盘本身的轮廓
+    this.decorTarget = shape === 'blackhole' ? 0 : 1;
   }
 
   setWarp(v: number): void {
@@ -261,10 +266,19 @@ export class AstroScene {
     this.stars.update(elapsed);
     this.nebula.update(elapsed);
 
-    this.ringA.rotation.z -= dt * 0.16;
-    this.ringB.rotation.z += dt * 0.22;
+    // 只在自身盘面内自转：轴向固定，避免转到与视线共面时粒子叠成一条刺眼亮线
+    this.ringA.rotation.y -= dt * 0.16;
+    this.ringB.rotation.y += dt * 0.22;
     this.ringA.rotation.x = Math.PI / 3 + Math.sin(elapsed * 0.28) * 0.05;
     this.ringB.rotation.x = -Math.PI / 4.4 + Math.cos(elapsed * 0.22) * 0.04;
+
+    // 装饰环淡入淡出
+    this.decorFade += (this.decorTarget - this.decorFade) * Math.min(dt * 3, 1);
+    (this.ringA.material as THREE.PointsMaterial).opacity = 0.55 * this.decorFade;
+    (this.ringB.material as THREE.PointsMaterial).opacity = 0.55 * this.decorFade;
+    const decorVisible = this.decorFade > 0.02;
+    this.ringA.visible = decorVisible;
+    this.ringB.visible = decorVisible;
 
     this.composer.render();
   };
