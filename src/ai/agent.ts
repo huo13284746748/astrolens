@@ -102,6 +102,7 @@ export class AstroAgent {
           args: { shape },
           result: `已切换形态为 ${MORPHS[shape].label}`,
         });
+        this.rippleEffect(hits[0].entry.id);
       }
 
       // 5. 流式讲解
@@ -178,6 +179,13 @@ export class AstroAgent {
     }
   }
 
+  /** 引力波这类「时空涟漪」主题：补一次脉冲与短时扭曲，让画面像被扰动 */
+  private rippleEffect(entryId: string): void {
+    if (entryId !== 'gravitationalwave') return;
+    this.tools.triggerEffect('pulse');
+    this.tools.triggerEffect('warp_on');
+  }
+
   /** 本地知识库回答：逐字输出，全部输出完成后再返回 */
   private answerOffline(
     hits: RetrievalHit[],
@@ -195,6 +203,7 @@ export class AstroAgent {
 
     this.tools.setMorph(best.entry.morph);
     this.tools.triggerEffect('pulse');
+    this.rippleEffect(best.entry.id);
 
     const text = fallbackAnswer(best.entry.title, best.entry.content);
     const chars = Array.from(text);

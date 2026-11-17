@@ -19,9 +19,9 @@ export const TOOL_SCHEMAS: ToolSchema[] = [
         properties: {
           shape: {
             type: 'string',
-            enum: ['sphere', 'blackhole', 'supernova', 'spiral', 'nebula', 'ring', 'vortex'],
+            enum: ['sphere', 'blackhole', 'supernova', 'spiral', 'nebula', 'ring', 'vortex', 'ripple'],
             description:
-              'sphere=恒星本体；blackhole=黑洞吸积盘；supernova=超新星爆发；spiral=涡旋星系；nebula=星云；ring=行星环；vortex=引力涡旋',
+              'sphere=恒星本体；blackhole=黑洞吸积盘；supernova=超新星爆发；spiral=涡旋星系；nebula=星云；ring=行星环；vortex=引力涡旋；ripple=时空涟漪（引力波）',
           },
           reason: {
             type: 'string',
@@ -90,6 +90,7 @@ const VALID_SHAPES = new Set<MorphShape>([
   'nebula',
   'ring',
   'vortex',
+  'ripple',
 ]);
 
 /** 执行一次工具调用，返回可读结果 */

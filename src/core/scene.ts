@@ -195,8 +195,8 @@ export class AstroScene {
 
   setMorph(shape: MorphShape): void {
     this.planet.setMorph(shape);
-    // 黑洞形态下淡出两条装饰环，突出吸积盘本身的轮廓
-    this.decorTarget = shape === 'blackhole' ? 0 : 1;
+    // 仅恒星形态保留装饰轨道环，其余形态淡出，避免与主体结构混淆
+    this.decorTarget = shape === 'sphere' ? 1 : 0;
   }
 
   setWarp(v: number): void {

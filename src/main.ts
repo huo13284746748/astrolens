@@ -31,15 +31,24 @@ const speech = new SpeechInput();
 
 let llmConfig: LlmConfig = loadLlmConfig();
 const llm = new LlmClient(llmConfig);
+let warpTimer: number | undefined;
 
 // ---------------- Agent 工具：AI → 场景 ----------------
 const agent = new AstroAgent(llm, {
   setMorph: (shape: MorphShape) => {
     scene.setMorph(shape);
+    // 切形态时清掉上一个知识点残留的扭曲与缩放，避免特效串台
+    // 镜头距离不重置：模型调过镜头后强行回默认会产生可见的推拉漂移
+    scene.setWarp(0);
+    scene.setScale(1);
+    window.clearTimeout(warpTimer);
+    // 超新星切换时补一次脉冲，模拟爆发瞬间的向外冲击
+    if (shape === 'supernova') scene.pulse(1.6);
     audio.play('morph');
   },
   setCamera: (distance: number) => {
-    scene.setCameraDistance(distance);
+    // 限制模型调整镜头的幅度，避免答案播放过程中出现明显的推拉漂移
+    scene.setCameraDistance(Math.min(390, Math.max(330, distance)));
   },
   triggerEffect: (effect) => {
     if (effect === 'pulse') {
@@ -48,8 +57,12 @@ const agent = new AstroAgent(llm, {
     } else if (effect === 'warp_on') {
       scene.setWarp(1);
       audio.play('warp');
+      // 自动收束：模型通常不会主动关闭，超时后恢复，避免扭曲一直叠加
+      window.clearTimeout(warpTimer);
+      warpTimer = window.setTimeout(() => scene.setWarp(0), 3000);
     } else {
       scene.setWarp(0);
+      window.clearTimeout(warpTimer);
     }
   },
 });

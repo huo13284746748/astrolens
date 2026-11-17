@@ -95,7 +95,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
   {
     id: 'solarsystem',
     title: '太阳系',
-    aliases: ['太阳系', '太阳', '行星', 'solar system'],
+    aliases: ['太阳系', '太阳', '行星', '星环', '行星环', '土星环', '光环', 'solar system'],
     content:
       '太阳系由太阳、八大行星、矮行星、卫星、小行星和彗星组成。' +
       '太阳占系统总质量的99.8%以上，通过核聚变持续释放能量，是地球生命的能量来源。',
@@ -118,7 +118,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     content:
       '引力波是加速运动的大质量天体在时空中激起的涟漪，以光速传播。' +
       '2015年LIGO首次直接探测到两个黑洞并合产生的引力波，验证了广义相对论的预言。',
-    morph: 'vortex',
+    morph: 'ripple',
   },
   {
     id: 'darkmatter',
